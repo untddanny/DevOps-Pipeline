@@ -1,0 +1,19 @@
+#Base Image: Specifies that the base image is Ubuntu 22.04. This is a minimal operating system image used to build your custom Docker image.
+FROM ubuntu:22.04
+MAINTAINER Nabeel
+
+# Install necessary dependencies for Java
+RUN apt update -y && \
+    apt install openjdk-17-jdk -y
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy the compiled .jar file into the container
+COPY target/myapp.jar /app/myapp.jar
+
+# Expose the port the app will run on
+EXPOSE 8080
+
+# Command to run the Java application
+CMD ["java", "-jar", "/app/myapp.jar"]
