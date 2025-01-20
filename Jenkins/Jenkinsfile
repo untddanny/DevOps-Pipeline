@@ -1,1 +1,81 @@
+pipeline {
+    agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '3')) // Keep only the last 3 builds
+        timestamps() // Add timestamps to build logs
+        disableConcurrentBuilds() // Prevent concurrent builds
+    }
+    environment {
+        DOCKER_IMAGE = "dockerusername/dockerimagename:${BUILD_NUMBER}" // Define the Docker image with build number
+    }
+    stages {
+        stage('Clean Workspace') {
+            steps {
+                echo "Cleaning workspace..."
+                sh "rm -rf /var/lib/jenkins/workspace/Dotnet/Dotnet8/*"
+            }
+        }
+        stage('Clone Repository') {
+            steps {
+                echo "Cloning repository..."
+                git url: 'https://github.com/your repo', branch: 'master'
+            }
+        }
+stages {
+        stage('Build Application') {
+            steps {
+                script {
+                    def lang = params.LANGUAGE // Use the parameter value
+                    echo "Building application for language: ${lang}"
+                    if (lang == "FrontEnd") {
+                        sh '''
+                            dotnet publish -c Release -o out
+                        '''
+                    } else if (lang == "BackEnd") {
+                        sh '''
+                            mvn clean package
+                        '''
+                    }  else if (lang == "python") {
+                        sh '''
+                            pip install -r requirements.txt
+                        '''
+                    } else {
+                        error "Unsupported language: ${lang}"
+                    }
+                }
+            }
+        }
+    }
+}
+        stage('Build Docker Image') {
+            steps {
+                echo "Building Docker image with tag ${DOCKER_IMAGE}..."
+                sh '''
+                    docker build -t ${DOCKER_IMAGE} .
+                '''
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                echo "Pushing Docker image with tag ${DOCKER_IMAGE}..."
+                sh '''
+                    docker push ${DOCKER_IMAGE}
+                '''
+            }
+        }
+    stage('Deploy Application to Kubernetes') {
+            steps {
+                echo "Deploying application to Kubernetes cluster..."
+                sh '''
+                    
+                '''
+            }
+        }
+    }
+    post {
+        always {
+            echo "Pipeline execution completed."
+        }
+    }
+}
 
